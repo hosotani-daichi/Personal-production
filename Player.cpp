@@ -20,10 +20,10 @@ void Player::Update() {
 	Input* input = Input::GetInstance();
 
 	const float speed = 0.1f;
-	const float gravity = 0.01f;      // 重力加速度
+	const float gravity = 0.015f;      // 重力加速度
 	const float jumpPower = 0.3f;     // ジャンプの初速度
 	const float groundY = -5.0f;      // 地面Y座標
-	const float rotationSpeed = 0.1f; // ← 補間速度（小さいほどゆっくり）
+	const float rotationSpeed = 0.1f; // 補間係数（滑らかさ）
 
 	if (input->PushKey(DIK_A)) {
 		worldTransform_.translation_.x -= speed;
@@ -37,7 +37,7 @@ void Player::Update() {
 	// 現在の角度（度）
 	float currentAngle = XMConvertToDegrees(worldTransform_.rotation_.y);
 
-	// 差分
+	// 差分（度）
 	float delta = targetAngleY_ - currentAngle;
 
 	// ここで補正：常に +方向に（時計回り）回るように補正
@@ -45,32 +45,35 @@ void Player::Update() {
 		delta += 360.0f;
 	}
 
-	// 補間
+	// 新しい角度を計算
 	float newAngle = currentAngle + delta * rotationSpeed;
 
-	// 0～360度に正規化
-	if (newAngle >= 360.0f)
-		newAngle -= 360.0f;
+	// 強制的に反時計回り（左回り）になるように補正
+	if (newAngle >= 360.0f) {
+		newAngle -= 360.0f; // 反時計回りで回るように補正
+	}
 
-	// ラジアンに変換してセット
+	// ラジアンにして反映
 	worldTransform_.rotation_.y = XMConvertToRadians(newAngle);
 
 	// ジャンプ入力（スペースキー）
-	if (!isJumping_ && input->TriggerKey(DIK_SPACE)) {
+	if (input->TriggerKey(DIK_SPACE) && jumpCount_ < maxJumpCount_) {
 		velocityY_ = jumpPower;
 		isJumping_ = true;
+		jumpCount_++; // ジャンプ回数を加算
 	}
 
-	// 重力の適用a
+	// 重力・落下処理
 	if (isJumping_) {
 		velocityY_ -= gravity;
 		worldTransform_.translation_.y += velocityY_;
 
-		// 仮の着地判定（Y=0で着地）
+		// 着地判定
 		if (worldTransform_.translation_.y <= groundY) {
 			worldTransform_.translation_.y = groundY;
 			isJumping_ = false;
 			velocityY_ = 0.0f;
+			jumpCount_ = 0; // 着地したらジャンプ回数リセット
 		}
 	}
 
