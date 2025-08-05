@@ -5,6 +5,7 @@
 class GameScene {
 
 public:
+
 	~GameScene();
 	void Initialize();
 	void Update();
@@ -12,5 +13,6 @@ public:
 
 private:
 
-	Model* model_ = nullptr;
+	KamataEngine::Camera* camera_ = nullptr;
+	Player player_;
 };
