@@ -11,7 +11,6 @@ public:
 	void Draw();
 
 private:
-	//自キャラ
-	Player* player_ = nullptr;
+
 	Model* model_ = nullptr;
 };
