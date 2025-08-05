@@ -12,4 +12,7 @@ private:
 
 	KamataEngine::Model* model_ = nullptr;
 	KamataEngine::WorldTransform worldTransform_;
+	float velocityY_ = 0.0f;
+	bool isJumping_ = false;
+	float targetAngleY_ = 90.0f; // ← 初期は右向き
 };
