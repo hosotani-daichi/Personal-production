@@ -156,6 +156,7 @@
   <ItemGroup>
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Map.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="WorldTransformEx.cpp" />
   </ItemGroup>
@@ -258,6 +259,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="Map.h" />
     <ClInclude Include="Player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
