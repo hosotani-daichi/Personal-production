@@ -58,3 +58,15 @@ void Map::Draw() {
 			sp->Draw();
 	}
 }
+
+int Map::GetTileIdAtPixel(float px, float py) const {
+	int tx = (int)(px / tileSize_);
+	int ty = (int)(py / tileSize_);
+	if (ty < 0 || ty >= (int)mapData_.size())
+		return 0;
+	if (tx < 0 || tx >= (int)mapData_[ty].size())
+		return 0;
+	return mapData_[ty][tx];
+}
+
+bool Map::IsBlockAtPixel(float px, float py) const { return GetTileIdAtPixel(px, py) == 1; }

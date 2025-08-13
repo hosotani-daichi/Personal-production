@@ -19,6 +19,9 @@ private:
 	uint32_t tilesetTex_ = 0;
 	int tileSize_ = 32;
 
+	int GetTileIdAtPixel(float px, float py) const;
+	bool IsBlockAtPixel(float px, float py) const;
+
 	std::vector<std::vector<int>> mapData_;      // CSVから読み込んだタイルID
 	std::vector<KamataEngine::Sprite*> sprites_; // タイルごとのスプライト
 };
