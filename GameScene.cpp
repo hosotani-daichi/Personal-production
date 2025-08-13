@@ -17,6 +17,8 @@ void GameScene::Initialize() {
 
 	camera_ = new Camera();
 	camera_->Initialize();
+
+	map_.Initialize("./Resources/Map/map.csv", TextureManager::Load("./Resources/tileset.png"), 32);
 }
 
 void GameScene::Update() { player_.Update(); }
@@ -45,6 +47,7 @@ void GameScene::Draw() {
 	Sprite::PreDraw(dxCommon->GetCommandList());
 
 	// ここに2Dスプライトの描画処理を記述する
+	map_.Draw();
 
 	// スプライト描画後処理
 	Sprite::PostDraw();
