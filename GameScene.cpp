@@ -19,6 +19,8 @@ void GameScene::Initialize() {
 	camera_->Initialize();
 
 	map_.Initialize("./Resources/Map/map.csv", TextureManager::Load("./Resources/tileset.png"), 32);
+
+	player_.SetMap(&map_);
 }
 
 void GameScene::Update() { player_.Update(); }

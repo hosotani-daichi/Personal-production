@@ -5,7 +5,7 @@ using namespace KamataEngine;
 
 void Map::Initialize(const std::string& csvPath, uint32_t tilesetTex, int tileSize) {
 	tilesetTex_ = tilesetTex;
-	tileSize_ = tileSize;
+	tileSize_ = static_cast<float>(tileSize);
 
 	if (!LoadCSV(csvPath)) {
 		// 読み込み失敗したら何もしない

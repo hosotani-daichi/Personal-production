@@ -19,11 +19,14 @@ void Player::Update() {
 
 	Input* input = Input::GetInstance();
 
-	const float speed = 0.1f;
-	const float gravity = 0.015f;      // 重力加速度
+	const float speed = 2.0f;
+	const float gravity = 0.015f;     // 重力加速度
 	const float jumpPower = 0.3f;     // ジャンプの初速度
 	const float groundY = -5.0f;      // 地面Y座標
 	const float rotationSpeed = 0.1f; // 補間係数（滑らかさ）
+
+	float nextX = worldTransform_.translation_.x;
+	float nextY = worldTransform_.translation_.y;
 
 	if (input->PushKey(DIK_A)) {
 		worldTransform_.translation_.x -= speed;
@@ -77,8 +80,37 @@ void Player::Update() {
 		}
 	}
 
-	worldTransform_.UpdateMatrix();
+	// マップの当たり判定
+	if (map_) {
+		// 足元判定（32ピクセルのタイルを前提）
+		float footX = nextX;
+		float footY = nextY - 1; // 足元
+
+		if (map_->IsBlockAtPixel(footX, footY)) {
+			// 足元がブロック → 着地
+			isJumping_ = false;
+			velocityY_ = 0.0f;
+			jumpCount_ = 0;
+
+			// タイル境界に揃える
+			float tileSize = 32.0f;
+			nextY = ((int)(footY / tileSize) + 1) * tileSize;
+		}
+
+		// 横移動の衝突
+		float headY = nextY + 16; // プレイヤーの頭位置（キャラサイズ次第で調整）
+		if (map_->IsBlockAtPixel(nextX, nextY) || map_->IsBlockAtPixel(nextX, headY)) {
+			// 衝突したらX移動キャンセル
+			nextX = worldTransform_.translation_.x;
+		}
+
+		// 位置更新
+		worldTransform_.translation_.x = nextX;
+		worldTransform_.translation_.y = nextY;
+		worldTransform_.UpdateMatrix();
+	}
 }
+
 
 void Player::Draw(const Camera& camera) {
 
