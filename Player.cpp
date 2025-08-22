@@ -9,10 +9,13 @@ void Player::Initialize() {
 
 	model_ = Model::CreateFromOBJ("player");
 	worldTransform_.Initialize();
+	worldTransform_.scale_ = {1.0f, 1.0f, 1.0f};
 	worldTransform_.translation_ = {0.0f, -5.0f, -30.0f};
 
 	// Y軸を +90度回転して右向きにする
 	worldTransform_.rotation_.y = XMConvertToRadians(90.0f);
+
+	worldTransform_.UpdateMatrix();
 }
 
 void Player::Update() {
@@ -25,8 +28,8 @@ void Player::Update() {
 	const float groundY = -5.0f;      // 地面Y座標
 	const float rotationSpeed = 0.1f; // 補間係数（滑らかさ）
 
-	float nextX = worldTransform_.translation_.x;
-	float nextY = worldTransform_.translation_.y;
+	float px = worldTransform_.translation_.x;
+	float py = worldTransform_.translation_.y;
 
 	if (input->PushKey(DIK_A)) {
 		worldTransform_.translation_.x -= speed;
@@ -83,10 +86,10 @@ void Player::Update() {
 	// マップの当たり判定
 	if (map_) {
 		// 足元判定（32ピクセルのタイルを前提）
-		float footX = nextX;
-		float footY = nextY - 1; // 足元
+		float pixelX = px;
+		float pixelY = py;
 
-		if (map_->IsBlockAtPixel(footX, footY)) {
+		if (map_->IsBlockAtPixel(pixelX, pixelY - 1)) {
 			// 足元がブロック → 着地
 			isJumping_ = false;
 			velocityY_ = 0.0f;
@@ -94,19 +97,19 @@ void Player::Update() {
 
 			// タイル境界に揃える
 			float tileSize = 32.0f;
-			nextY = ((int)(footY / tileSize) + 1) * tileSize;
+			pixelY = ((int)(pixelY / tileSize) + 1) * tileSize;
 		}
 
 		// 横移動の衝突
-		float headY = nextY + 16; // プレイヤーの頭位置（キャラサイズ次第で調整）
-		if (map_->IsBlockAtPixel(nextX, nextY) || map_->IsBlockAtPixel(nextX, headY)) {
+		float headY = pixelY + 16; // プレイヤーの頭位置（キャラサイズ次第で調整）
+		if (map_->IsBlockAtPixel(pixelX, pixelY) || map_->IsBlockAtPixel(pixelX, headY)) {
 			// 衝突したらX移動キャンセル
-			nextX = worldTransform_.translation_.x;
+			pixelX = worldTransform_.translation_.x;
 		}
 
 		// 位置更新
-		worldTransform_.translation_.x = nextX;
-		worldTransform_.translation_.y = nextY;
+		worldTransform_.translation_.x = pixelX;
+		worldTransform_.translation_.y = pixelY;
 		worldTransform_.UpdateMatrix();
 	}
 }

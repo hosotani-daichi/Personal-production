@@ -18,6 +18,10 @@ void GameScene::Initialize() {
 	camera_ = new Camera();
 	camera_->Initialize();
 
+	camera_->translation_ = {0, 0, -100};
+	camera_->rotation_ = {0, 0, 0};
+	camera_->UpdateMatrix();
+
 	map_.Initialize("./Resources/Map/map.csv", TextureManager::Load("./Resources/tileset.png"), 32);
 
 	player_.SetMap(&map_);

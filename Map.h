@@ -5,9 +5,7 @@
 
 class Map {
 public:
-	// csvPath … マップデータのCSVファイルパス
-	// tilesetTex … タイルセットのテクスチャハンドル
-	// tileSize … 1タイルのピクセルサイズ
+
 	void Initialize(const std::string& csvPath, uint32_t tilesetTex, int tileSize);
 
 	void Draw();
