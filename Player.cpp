@@ -20,7 +20,7 @@ void Player::Update() {
 	Input* input = Input::GetInstance();
 
 	const float speed = 0.1f;
-	const float gravity = 0.015f;      // 重力加速度
+	const float gravity = 0.015f;     // 重力加速度
 	const float jumpPower = 0.3f;     // ジャンプの初速度
 	const float groundY = -5.0f;      // 地面Y座標
 	const float rotationSpeed = 0.1f; // 補間係数（滑らかさ）
@@ -40,18 +40,29 @@ void Player::Update() {
 	// 差分（度）
 	float delta = targetAngleY_ - currentAngle;
 
-	// ここで補正：常に +方向に（時計回り）回るように補正
-	if (delta < 0) {
+	//最初の方向転換かどうかを判定するフラグ
+	bool firstTurnDone_ = false;
+
+	// 正規化（-180° ～ 180°に収める）
+	if (delta > 180.0f) {
+		delta -= 360.0f;
+	} else if (delta < -180.0f) {
 		delta += 360.0f;
+	}
+
+	// 左(-90) → 右(90) は必ず反時計回り
+	if (currentAngle > -135.0f && currentAngle < -45.0f && targetAngleY_ == 90.0f) {
+		delta = -270.0f;
+	}
+
+	// 最初の右(90) → 左(-90) だけは時計回り
+	if (!firstTurnDone_ && currentAngle > 45.0f && currentAngle < 135.0f && targetAngleY_ == -90.0f) {
+		delta = +270.0f;       // 時計回り
+		firstTurnDone_ = true; // 以降は通常処理
 	}
 
 	// 新しい角度を計算
 	float newAngle = currentAngle + delta * rotationSpeed;
-
-	// 強制的に反時計回り（左回り）になるように補正
-	if (newAngle >= 360.0f) {
-		newAngle -= 360.0f; // 反時計回りで回るように補正
-	}
 
 	// ラジアンにして反映
 	worldTransform_.rotation_.y = XMConvertToRadians(newAngle);
