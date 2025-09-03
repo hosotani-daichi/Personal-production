@@ -6,9 +6,8 @@ class Player {
 public:
 
 	void Initialize();
-	void Update();
+	void Update(Map& map);
 	void Draw(const KamataEngine::Camera& camera);
-	void SetMap(const Map* map) { map_ = map; }
 
 private:
 
@@ -23,6 +22,5 @@ private:
 	float holdTimer_ = 0.0f;     // ジャンプホールド時間
 	const float maxHoldTime_ = 0.2f;    // 最大ホールド時間（秒）
 	const float holdJumpBoost_ = 0.01f; // フレームごとの追加ジャンプ力
-	const Map* map_ = nullptr;          // マップ
-
+	bool prevSpace_ = false;            // 前フレームのスペースキー状態
 };

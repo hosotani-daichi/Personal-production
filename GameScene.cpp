@@ -1,4 +1,5 @@
 #include "GameScene.h"
+#include "Map.h"
 #include <cmath>
 
 using namespace KamataEngine;
@@ -18,22 +19,21 @@ void GameScene::Initialize() {
 	camera_ = new Camera();
 	camera_->Initialize();
 
-	camera_->translation_ = {0, 0, -100};
-	camera_->rotation_ = {0, 0, 0};
-	camera_->UpdateMatrix();
+	// マップ初期化
+	map_.Initialize(2);                      // 1タイル=2ユニット
+	map_.LoadFromCSV("resources/Map/map.csv"); // CSV読み込み
 
-	map_.Initialize("./Resources/Map/map.csv", TextureManager::Load("./Resources/tileset.png"), 32);
-
-	player_.SetMap(&map_);
 }
 
-void GameScene::Update() { player_.Update(); }
+void GameScene::Update() { player_.Update(map_); }
 
 void GameScene::Draw() {
 
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
-
 	Sprite::PreDraw(DirectXCommon::GetInstance()->GetCommandList());
+
+	Sprite::PreDraw();
+
 
 	Sprite::PostDraw();
 
@@ -45,6 +45,7 @@ void GameScene::Draw() {
 
 	// ここに3Dモデルインスタンスの描画処理を記述する
 	player_.Draw(*camera_);
+	map_.Draw(*camera_);
 
 	// 3Dモデル描画後処理
 	Model::PostDraw();
@@ -53,7 +54,6 @@ void GameScene::Draw() {
 	Sprite::PreDraw(dxCommon->GetCommandList());
 
 	// ここに2Dスプライトの描画処理を記述する
-	map_.Draw();
 
 	// スプライト描画後処理
 	Sprite::PostDraw();

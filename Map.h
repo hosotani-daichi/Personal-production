@@ -1,26 +1,27 @@
 #pragma once
-#include "KamataEngine.h"
+#include <KamataEngine.h>
 #include <string>
 #include <vector>
 
 class Map {
 public:
+	// 初期化（タイルサイズを指定）
+	void Initialize(int tileSize);
 
-	void Initialize(const std::string& csvPath, uint32_t tilesetTex, int tileSize);
+	// CSVからマップを読み込む
+	void LoadFromCSV(const std::string& filename);
 
-	void Draw();
+	// 指定座標がブロックかどうかを判定
+	bool IsBlockAt(float worldX, float worldY) const;
 
-	int GetTileIdAtPixel(float px, float py) const;
-	bool IsBlockAtPixel(float px, float py) const;
+	// マップを描画
+	void Draw(KamataEngine::Camera& camera);
+
+	int GetTileSize() const { return tileSize_; }
 
 private:
-	bool LoadCSV(const std::string& csvPath);
-
-private:
-	uint32_t tilesetTex_ = 0;
-	float tileSize_ = 32.0f;
-
-
-	std::vector<std::vector<int>> mapData_;      // CSVから読み込んだタイルID
-	std::vector<KamataEngine::Sprite*> sprites_; // タイルごとのスプライト
+	std::vector<std::vector<int>> mapData_; // 2Dマップデータ（0=空,1=ブロック）
+	int width_ = 0;                         // 横マス数
+	int height_ = 0;                        // 縦マス数
+	int tileSize_ = 1;                      // 1タイルの大きさ（ワールド座標単位）
 };

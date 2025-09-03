@@ -1,72 +1,56 @@
 #include "Map.h"
 #include <fstream>
 #include <sstream>
+#include <string>
 using namespace KamataEngine;
 
-void Map::Initialize(const std::string& csvPath, uint32_t tilesetTex, int tileSize) {
-	tilesetTex_ = tilesetTex;
-	tileSize_ = static_cast<float>(tileSize);
+void Map::Initialize(int tileSize) { tileSize_ = tileSize; }
 
-	if (!LoadCSV(csvPath)) {
-		// 読み込み失敗したら何もしない
-		return;
-	}
-
-	// CSVの内容からSprite生成
-	for (int y = 0; y < (int)mapData_.size(); ++y) {
-		for (int x = 0; x < (int)mapData_[y].size(); ++x) {
-			int id = mapData_[y][x];
-			if (id == 0) {
-				sprites_.push_back(nullptr);
-				continue;
-			}
-
-			auto sp = Sprite::Create(tilesetTex_, {(float)(x * tileSize_), (float)(y * tileSize_)});
-			sp->SetSize({(float)tileSize_, (float)tileSize_});
-			sprites_.push_back(sp);
-		}
-	}
-}
-
-bool Map::LoadCSV(const std::string& csvPath) {
-	std::ifstream file(csvPath);
-	if (!file.is_open()) {
-		return false;
-	}
-
-	mapData_.clear();
+void Map::LoadFromCSV(const std::string& filename) {
+	std::ifstream file(filename); // CSVを開く
 	std::string line;
+	mapData_.clear();
+
+	// 1行ずつ読み込み
 	while (std::getline(file, line)) {
+		std::vector<int> row;
 		std::stringstream ss(line);
 		std::string cell;
-		std::vector<int> row;
+
+		// カンマ区切りで分割
 		while (std::getline(ss, cell, ',')) {
-			try {
-				row.push_back(std::stoi(cell));
-			} catch (...) {
-				row.push_back(0);
-			}
+			row.push_back(std::stoi(cell));
 		}
 		mapData_.push_back(row);
 	}
-	return true;
+
+	// サイズ更新
+	height_ = (int)mapData_.size();
+	width_ = (height_ > 0) ? (int)mapData_[0].size() : 0;
 }
 
-void Map::Draw() {
-	for (auto sp : sprites_) {
-		if (sp)
-			sp->Draw();
+bool Map::IsBlockAt(float worldX, float worldY) const {
+	int tileX = static_cast<int>(worldX / tileSize_);
+	int tileY = static_cast<int>(worldY / tileSize_);
+
+	// 範囲外はブロックなし
+	if (tileX < 0 || tileX >= width_ || tileY < 0 || tileY >= height_) {
+		return false;
+	}
+	return mapData_[tileY][tileX] == 1; // 1ならブロック
+}
+
+void Map::Draw(Camera& camera) {
+	for (int y = 0; y < height_; ++y) {
+		for (int x = 0; x < width_; ++x) {
+			if (mapData_[y][x] == 1) { // ブロックだけ描画
+				auto block = Model::CreateFromOBJ("block");
+				WorldTransform wt;
+				wt.Initialize();
+				wt.translation_ = {(float)(x * tileSize_), (float)(y * tileSize_), 0.0f};
+				wt.UpdateMatrix();
+				block->Draw(wt, camera);
+			}
+		}
 	}
 }
-
-int Map::GetTileIdAtPixel(float px, float py) const {
-	int tx = (int)(px / tileSize_);
-	int ty = (int)(py / tileSize_);
-	if (ty < 0 || ty >= (int)mapData_.size())
-		return 0;
-	if (tx < 0 || tx >= (int)mapData_[ty].size())
-		return 0;
-	return mapData_[ty][tx];
-}
-
-bool Map::IsBlockAtPixel(float px, float py) const { return GetTileIdAtPixel(px, py) == 1; }
