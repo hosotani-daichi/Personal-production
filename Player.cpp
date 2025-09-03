@@ -19,7 +19,7 @@ void Player::Update() {
 
 	Input* input = Input::GetInstance();
 
-	const float speed = 0.1f;
+	const float speed = 0.1f;         // キャラのスピード
 	const float gravity = 0.015f;     // 重力加速度
 	const float jumpPower = 0.3f;     // ジャンプの初速度
 	const float groundY = -5.0f;      // 地面Y座標

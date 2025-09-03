@@ -10,7 +10,7 @@ public:
 	void Initialize();
 	void Update();
 	void Draw();
-
+		
 private:
 
 	KamataEngine::Camera* camera_ = nullptr;
