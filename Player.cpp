@@ -21,7 +21,6 @@ void Player::Update() {
 
 	const float speed = 0.1f;         // キャラのスピード
 	const float gravity = 0.015f;     // 重力加速度
-	const float jumpPower = 0.3f;     // ジャンプの初速度
 	const float groundY = -5.0f;      // 地面Y座標
 	const float rotationSpeed = 0.1f; // 補間係数（滑らかさ）
 
@@ -40,7 +39,7 @@ void Player::Update() {
 	// 差分（度）
 	float delta = targetAngleY_ - currentAngle;
 
-	//最初の方向転換かどうかを判定するフラグ
+	// 最初の方向転換かどうかを判定するフラグ
 	bool firstTurnDone_ = false;
 
 	// 正規化（-180° ～ 180°に収める）
@@ -67,11 +66,32 @@ void Player::Update() {
 	// ラジアンにして反映
 	worldTransform_.rotation_.y = XMConvertToRadians(newAngle);
 
-	// ジャンプ入力（スペースキー）
-	if (input->TriggerKey(DIK_SPACE) && jumpCount_ < maxJumpCount_) {
-		velocityY_ = jumpPower;
+	bool spaceNow = input->PushKey(DIK_SPACE);
+	bool spaceTriggered = input->TriggerKey(DIK_SPACE);
+	bool spaceReleased = prevSpace_ && !spaceNow;
+
+	// ジャンプ開始
+	if (spaceTriggered && jumpCount_ < maxJumpCount_) {
+		velocityY_ = 0.3f;
 		isJumping_ = true;
-		jumpCount_++; // ジャンプ回数を加算
+		isHoldingJump_ = true;
+		holdTimer_ = 0.0f;
+		jumpCount_++;
+	}
+
+	// ジャンプホールド
+	if (isHoldingJump_ && spaceNow) {
+		holdTimer_ += 1.0f / 60.0f; // 60FPS想定
+		if (holdTimer_ < maxHoldTime_) {
+			velocityY_ += holdJumpBoost_;
+		} else {
+			isHoldingJump_ = false;
+		}
+	}
+
+	//話したらホールド終了
+	if (spaceReleased) {
+		isHoldingJump_ = false;
 	}
 
 	// 重力・落下処理
