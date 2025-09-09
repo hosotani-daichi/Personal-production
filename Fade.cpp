@@ -6,7 +6,7 @@ void Fade::Initialize() {
 	uint32_t tex = TextureManager::Load("Fade/black.png");
 	blackSprite_ = Sprite::Create(tex, {0, 0});
 	blackSprite_->SetSize({1280, 720});
-	alpha_ = 1.0f; // 最初は真っ黒から始めてもOK
+	alpha_ = 1.0f; 
 	state_ = FadeState::None;
 	finished_ = true;
 }
