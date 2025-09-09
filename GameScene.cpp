@@ -15,8 +15,14 @@ void GameScene::Initialize() {
 	// プレイヤーの初期化
 	player_.Initialize();
 
+	// 天球の3Dモデルの生成
+	Spheremodel_ = Model::CreateFromOBJ("Sphere");
+
 	camera_ = new Camera();
 	camera_->Initialize();
+
+	// 天球の初期化
+	sphere_.Initialize(Spheremodel_, camera_);
 
 	sceneState_ = SceneState::Title;
 	fade_.Initialize();
@@ -32,6 +38,7 @@ void GameScene::Update() {
 
 	switch (sceneState_) {
 	case SceneState::Title:
+		sphere_.Update();
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			fade_.Start(FadeState::FadeOut);
 			nextScene_ = SceneState::Game;
@@ -39,6 +46,7 @@ void GameScene::Update() {
 		break;
 
 	case SceneState::Game:
+		sphere_.Update();
 		player_.Update();
 		// 例: Enter でクリア画面に遷移
 		if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
@@ -48,6 +56,7 @@ void GameScene::Update() {
 		break;
 
 	case SceneState::Clear:
+		sphere_.Update();
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			fade_.Start(FadeState::FadeOut);
 			nextScene_ = SceneState::Title;
@@ -72,6 +81,10 @@ void GameScene::Draw() {
 
 	// 3D描画
 	Model::PreDraw();
+
+	// 天球
+	sphere_.Draw();
+
 	if (sceneState_ == SceneState::Game) {
 		player_.Draw(*camera_);
 	}
@@ -82,10 +95,8 @@ void GameScene::Draw() {
 
 	switch (sceneState_) {
 	case SceneState::Title:
-		// TODO: タイトル用の文字スプライトを描画
 		break;
 	case SceneState::Clear:
-		// TODO: クリア画面用の文字スプライトを描画
 		break;
 	default:
 		break;
