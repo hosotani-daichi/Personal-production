@@ -4,7 +4,11 @@
 #include "Player.h"
 
 // シーンの種類
-enum class SceneState { Title, Play, Clear };
+enum class SceneState {
+	Title,
+	Game,
+	Clear,
+};
 
 class GameScene {
 

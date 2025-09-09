@@ -20,80 +20,79 @@ void GameScene::Initialize() {
 
 	sceneState_ = SceneState::Title;
 	fade_.Initialize();
-	fade_.Start(FadeState::IrisIn); // タイトルはフェードインで開始
+	fade_.Start(FadeState::FadeIn); // タイトルはフェードインで開始
 }
 
 void GameScene::Update() {
-
-	Input* input = Input::GetInstance();
-
 	fade_.Update();
 
+	// フェード中は入力を受け付けない
+	if (!fade_.IsFinished())
+		return;
+
 	switch (sceneState_) {
-
 	case SceneState::Title:
-
-		if (input->TriggerKey(DIK_RETURN)) {
-			fade_.Start(FadeState::IrisOut);
-			nextScene_ = SceneState::Play;
+		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+			fade_.Start(FadeState::FadeOut);
+			nextScene_ = SceneState::Game;
 		}
 		break;
 
-	case SceneState::Play:
-
+	case SceneState::Game:
 		player_.Update();
-		if (input->TriggerKey(DIK_RETURN)) {
-			fade_.Start(FadeState::IrisOut);
+		// 例: Enter でクリア画面に遷移
+		if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+			fade_.Start(FadeState::FadeOut);
 			nextScene_ = SceneState::Clear;
 		}
 		break;
 
 	case SceneState::Clear:
-
-		if (input->TriggerKey(DIK_RETURN)) {
-			fade_.Start(FadeState::IrisOut);
+		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+			fade_.Start(FadeState::FadeOut);
 			nextScene_ = SceneState::Title;
 		}
 		break;
 	}
 
-	// フェードアウトが終わったら次のシーンに移行
-	if (fade_.IsFinished()) {
-		sceneState_ = nextScene_;
-		fade_.Start(FadeState::IrisIn); // 新シーンをフェードイン
-		fade_.ResetFinished();
+	// フェードアウト終了後にシーン切り替え
+	if (fade_.IsFinished() && fade_.GetState() == FadeState::None) {
+		if (sceneState_ != nextScene_) {
+			sceneState_ = nextScene_;
+			fade_.Start(FadeState::FadeIn);
+		}
 	}
 }
 
 void GameScene::Draw() {
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
-	// 3Dスプライト（UIなど）描画
+	// 深度バッファクリア
+	dxCommon->ClearDepthBuffer();
+
+	// 3D描画
+	Model::PreDraw();
+	if (sceneState_ == SceneState::Game) {
+		player_.Draw(*camera_);
+	}
+	Model::PostDraw();
+
+	// 2D描画（UI, フェードなど）
 	Sprite::PreDraw(dxCommon->GetCommandList());
 
 	switch (sceneState_) {
 	case SceneState::Title:
-		// titleSprite->Draw();
-		break;
-	case SceneState::Play:
+		// TODO: タイトル用の文字スプライトを描画
 		break;
 	case SceneState::Clear:
-		// clearSprite->Draw();
+		// TODO: クリア画面用の文字スプライトを描画
+		break;
+	default:
 		break;
 	}
 
-	// フェードは最前面に描画
+	// フェードを一番上に
 	fade_.Draw();
 
 	Sprite::PostDraw();
-
-	// 深度バッファクリア
-	dxCommon->ClearDepthBuffer();
-
-	// 3Dモデル描画
-	Model::PreDraw();
-	if (sceneState_ == SceneState::Play) {
-		player_.Draw(*camera_);
-	}
-	Model::PostDraw();
 }

@@ -2,33 +2,27 @@
 #include "KamataEngine.h"
 
 enum class FadeState {
-
 	None,
-	IrisIn,
-	IrisOut,
+	FadeIn,
+	FadeOut,
 };
 
 class Fade {
-
 public:
 	void Initialize();
-	void Start(FadeState state);
 	void Update();
 	void Draw();
 
-	bool IsFinished() const;
-	void ResetFinished();
+	void Start(FadeState state); // フェード開始
+	bool IsFinished() const { return finished_; }
 
-private:
-	// 内部描画用
-	void DrawIris(float cx, float cy, float r, float screenW, float screenH);
+	FadeState GetState() const { return state_; }
 
 private:
 	FadeState state_ = FadeState::None;
-	float radius_ = 0.0f;
-	float maxRadius_ = 0.0f;
-	float speed_ = 0.0f;
-	bool finished_ = false;
+	float alpha_ = 0.0f;
+	float speed_ = 0.02f;
+	bool finished_ = true;
 
-	uint32_t blackTex_ = 0;
+	KamataEngine::Sprite* blackSprite_ = nullptr;
 };
