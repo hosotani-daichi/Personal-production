@@ -19,13 +19,9 @@ void GameScene::Initialize() {
 	camera_ = new Camera();
 	camera_->Initialize();
 
-	// マップ初期化
-	map_.Initialize(2);                      // 1タイル=2ユニット
-	map_.LoadFromCSV("resources/Map/map.csv"); // CSV読み込み
-
 }
 
-void GameScene::Update() { player_.Update(map_); }
+void GameScene::Update() { player_.Update(); }
 
 void GameScene::Draw() {
 
@@ -45,7 +41,6 @@ void GameScene::Draw() {
 
 	// ここに3Dモデルインスタンスの描画処理を記述する
 	player_.Draw(*camera_);
-	map_.Draw(*camera_);
 
 	// 3Dモデル描画後処理
 	Model::PostDraw();

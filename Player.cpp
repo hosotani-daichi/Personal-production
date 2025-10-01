@@ -1,5 +1,4 @@
 #include "Player.h"
-#include "Map.h"
 #include "input/Input.h"
 #include <DirectXMath.h>
 
@@ -16,13 +15,14 @@ void Player::Initialize() {
 	worldTransform_.rotation_.y = XMConvertToRadians(90.0f);
 }
 
-void Player::Update(Map& map) {
+void Player::Update() {
 
 	Input* input = Input::GetInstance();
 
 	const float speed = 0.1f;         // キャラのスピード
 	const float gravity = 0.015f;     // 重力加速度
-	//const float groundY = -5.0f;      // 地面Y座標
+	const float jumpPower = 0.3f;     // ジャンプの初速度
+	const float groundY = -5.0f;      // 地面Y座標
 	const float rotationSpeed = 0.1f; // 補間係数（滑らかさ）
 
 	if (input->PushKey(DIK_A)) {
@@ -40,7 +40,7 @@ void Player::Update(Map& map) {
 	// 差分（度）
 	float delta = targetAngleY_ - currentAngle;
 
-	// 最初の方向転換かどうかを判定するフラグ
+	//最初の方向転換かどうかを判定するフラグ
 	bool firstTurnDone_ = false;
 
 	// 正規化（-180° ～ 180°に収める）
@@ -67,54 +67,26 @@ void Player::Update(Map& map) {
 	// ラジアンにして反映
 	worldTransform_.rotation_.y = XMConvertToRadians(newAngle);
 
-	bool spaceNow = input->PushKey(DIK_SPACE);
-	bool spaceTriggered = input->TriggerKey(DIK_SPACE);
-	bool spaceReleased = prevSpace_ && !spaceNow;
-
-	// ジャンプ開始
-	if (spaceTriggered && jumpCount_ < maxJumpCount_) {
-		velocityY_ = 0.3f;
+	// ジャンプ入力（スペースキー）
+	if (input->TriggerKey(DIK_SPACE) && jumpCount_ < maxJumpCount_) {
+		velocityY_ = jumpPower;
 		isJumping_ = true;
-		isHoldingJump_ = true;
-		holdTimer_ = 0.0f;
-		jumpCount_++;
+		jumpCount_++; // ジャンプ回数を加算
 	}
 
-	// ジャンプホールド
-	if (isHoldingJump_ && spaceNow) {
-		holdTimer_ += 1.0f / 60.0f; // 60FPS想定
-		if (holdTimer_ < maxHoldTime_) {
-			velocityY_ += holdJumpBoost_;
-		} else {
-			isHoldingJump_ = false;
-		}
-	}
+	// 重力・落下処理
+	if (isJumping_) {
+		velocityY_ -= gravity;
+		worldTransform_.translation_.y += velocityY_;
 
-	// 離したらホールド終了
-	if (spaceReleased) {
-		isHoldingJump_ = false;
-	}
-
-// --- 縦方向の移動 ---
-	velocityY_ -= gravity; // 重力
-	float nextY = worldTransform_.translation_.y + velocityY_;
-
-	// 移動先がブロックかどうか調べる
-	if (map.IsBlockAt(worldTransform_.translation_.x, nextY)) {
-		// 下に着地した場合
-		if (velocityY_ < 0) {
-			nextY = static_cast<float>((int)(nextY / map.GetTileSize())) * map.GetTileSize();
-			velocityY_ = 0;
+		// 着地判定
+		if (worldTransform_.translation_.y <= groundY) {
+			worldTransform_.translation_.y = groundY;
 			isJumping_ = false;
-			jumpCount_ = 0;
-		} else {
-			// 上にぶつかった（天井）
-			velocityY_ = 0;
+			velocityY_ = 0.0f;
+			jumpCount_ = 0; // 着地したらジャンプ回数リセット
 		}
 	}
-
-	worldTransform_.translation_.y = nextY;
-
 
 	worldTransform_.UpdateMatrix();
 }
