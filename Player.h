@@ -7,8 +7,8 @@ public:
 	void Update();
 	void Draw(const KamataEngine::Camera& camera);
 
-	const Vector3& GetVelocity() const { return velocity_; }
-	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
+	const KamataEngine::Vector3& GetVelocity() const { return velocity_; }
+	const KamataEngine::WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
 private:
 	KamataEngine::Model* model_ = nullptr;
@@ -23,5 +23,5 @@ private:
 	const float maxHoldTime_ = 0.2f;    // 最大ホールド時間（秒）
 	const float holdJumpBoost_ = 0.01f; // フレームごとの追加ジャンプ力
 	bool prevSpace_ = false;            // 前フレームのスペースキー状態
-	Vector3 velocity_ = {};
+	KamataEngine::Vector3 velocity_ = {};
 };
